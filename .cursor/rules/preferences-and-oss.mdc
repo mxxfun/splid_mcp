@@ -1,0 +1,18 @@
+---
+alwaysApply: true
+---
+# Team Preferences and OSS Decisions
+
+- Communication & style
+  - English‑only codebase, names, descriptions, README.
+  - Prefer concise, high‑signal changes; pragmatic 20/80 improvements.
+- Dependencies vs. forking
+  - Use `splid-js` as a normal dependency (npm `splid-js@1.5.3`) rather than forking.
+  - Attribute upstream in README; fork only if upstream changes are required and not accepted quickly.
+- Secrets
+  - Read from `.env` only; `CODE` contains the Splid invite code. Do not log secrets.
+- Testing/Inspector
+  - Local testing via MCP Inspector with Streamable HTTP at `http://localhost:8000/mcp` (no proxy token required for server).
+- Error handling
+  - Prefer clear, actionable error messages over silent fallbacks.
+  - Validation failures should be explicit (e.g., unknown names, share sums).

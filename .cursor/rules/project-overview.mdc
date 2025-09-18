@@ -1,0 +1,30 @@
+---
+alwaysApply: true
+---
+# Project Overview and Architecture
+
+This repo implements an MCP server exposing Splid (splid.app) functionality via the TypeScript SDK.
+
+- Entry points
+  - [src/server.ts](mdc:src/server.ts): Express app + MCP Streamable HTTP transport mounted at `/mcp` with session management.
+  - [src/mcp.ts](mdc:src/mcp.ts): Tool registration and input validation using Zod.
+- Environment
+  - `.env`: `CODE` (invite code for a Splid group), optional `PORT` (default 8000).
+- Runtime
+  - Node.js ESM (type: module), TypeScript compiled to `dist/`.
+  - Transport: Streamable HTTP only (no proxy/OAuth); Inspector connects to `http://localhost:8000/mcp`.
+- Session handling (per MCP spec)
+  - First POST without `Mcp-Session-Id` must be an initialization request.
+  - Server generates a session ID and stores the transport; subsequent requests require `Mcp-Session-Id`.
+  - SSE GET and DELETE also use `Mcp-Session-Id`. See logic in [src/server.ts](mdc:src/server.ts).
+- Dependencies of interest
+  - `@modelcontextprotocol/sdk`: server, streamable HTTP transport, `isInitializeRequest`.
+  - `splid-js@1.5.3`: reverse‑engineered Splid client (npm published build).
+  - `zod`: input validation for tools.
+- Health
+  - `GET /health` → `{ ok: true }` for quick checks.
+
+Design goals
+- Build a reliable MCP server quickly by reusing `splid-js` directly.
+- Keep the interface English‑only; prefer concise, high‑signal tool designs.
+- Default behaviors that minimize user friction (e.g., default currency, name or ID resolution).

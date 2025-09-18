@@ -1,0 +1,32 @@
+---
+globs: src/mcp.ts
+---
+# MCP Tools and Validation Rules
+
+Tools are registered in [src/mcp.ts](mdc:src/mcp.ts) using `McpServer` and `zod`.
+
+- Tools
+  - `health`: returns `{ ok: true }` text.
+  - `whoami`: returns group info and members resolved from `CODE`.
+  - `createExpense`:
+    - Input:
+      - Group selector (optional): `groupId?`, `groupCode?`, `groupName?` (name reserved; not yet supported)
+      - `title: string`
+      - `amount: number > 0`
+      - `currencyCode?: string` (defaults to group default if omitted)
+      - `payers: { userId?: string; name?: string; amount: number > 0 }[]` (≥1)
+      - `profiteers: { userId?: string; name?: string; share: number in (0,1] }[]` (≥1)
+    - Behavior:
+      - Group override: if selector present, resolve group before action; else use default.
+      - Name resolution: names are case‑insensitive and resolved to member GlobalId (preferred Splid identifier). Unknown names → error.
+      - Share validation: sum(profiteers.share) must equal 1 (±1e‑6) → else error.
+  - `listEntries(limit?, group selector)`: lists recent entries for selected/default group.
+  - `getGroupSummary`: balances via `SplidClient.getBalance`.
+
+Validation rationale
+- Avoid silent misattribution; explicit errors on unknown names and invalid share totals.
+- Default currency minimizes friction; can override via `currencyCode`.
+
+Extending tools
+- Add tools by defining a zod schema and registering via `server.registerTool`.
+- Prefer structured validations and clear errors.
